@@ -98,15 +98,17 @@ if __name__ == '__main__':
                     if status['mergeable'] is False:
                         conflicted.append(status['pr'])
                     remaining.remove(pr)
-            if remaining:
-                time.sleep(1)
+            if remaining and len(prs) < 1000:
+                time.sleep(1. - .001 * len(prs))
         for pr in conflicted:
             pr_report = '#{number}\t{title}\n{html_url}'.format_map(pr)
             pr_report += f'\n{pr["head"]["label"]} @ {pr["head"]["sha"]}\nref {pr["base"]["ref"]} @ {pr["base"]["sha"]} ({pr["commits"]} commits)'
             report.append(pr_report)
-        print('\n#######\n'.join(report))
+        print('\n\n'.join(report))
         pprint.pprint(s.get('{}/rate_limit'.format(BASE)).json()['resources'])
     with open('report.txt', 'w') as output:
-        output.write('\n#######\n'.join(report))
+        message = f'Checked {len(prs)} open PRs, found {len(conflicted)} with merge conflicts:\n'
+        message += '\n\n'.join(report)
+        output.write(message)
     with open('report_detailed.txt', 'w') as details:
         json.dump(conflicted, details, indent=2)
