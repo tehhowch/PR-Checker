@@ -76,7 +76,7 @@ def request_pr_status(pull: dict, session: Session):
     response: Response = session.get(url)
     if response.status_code is 200:
         data = response.json()
-        if 'mergeable' in data and data['mergeable'] is not 'null':
+        if 'mergeable' in data and data['mergeable'] is not None:
             return {'completed': True, 'mergeable': data['mergeable'], 'pr': data}
         return {'completed': False}
     response.raise_for_status()
@@ -92,6 +92,7 @@ if __name__ == '__main__':
         prs = get_open_prs(user, s)
         remaining = prs.copy()
         while remaining:
+            print("Querying statuses...")
             for pr in remaining:
                 status = request_pr_status(pr, s)
                 if status['completed'] is True:
